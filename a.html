@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>הלכות - שולחן ערוך וילקוט יוסף (30 ימים)</title>
+  <style>
+    :root{
+      --bg:#fbfbfb; --card:#fff; --accent:#0b6b4f; --muted:#666;
+      --grid-gap:12px; --pad:16px;
+    }
+    *{box-sizing:border-box}
+    body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial; background:var(--bg); color:#111; margin:0; padding:20px}
+    header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
+    h1{font-size:20px;margin:0;color:var(--accent)}
+    p.lead{margin:0;color:var(--muted)}
+
+    /* calendar */
+    .calendar{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:var(--grid-gap);margin-top:16px}
+    .day{background:var(--card);border-radius:10px;padding:12px;box-shadow:0 2px 6px rgba(10,10,10,0.06);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px}
+    .day span.num{font-weight:700;font-size:18px;color:var(--accent)}
+    .day span.label{font-size:14px;color:var(--muted)}
+
+    /* detail view */
+    .detail{display:none;background:var(--card);padding:18px;border-radius:12px;box-shadow:0 6px 18px rgba(10,10,10,0.06);margin-top:20px}
+    .detail.active{display:block}
+    .detail .toolbar{display:flex;gap:8px;align-items:center;margin-bottom:12px}
+    button.btn{background:var(--accent);color:white;border:none;padding:8px 12px;border-radius:8px;cursor:pointer}
+    button.ghost{background:transparent;color:var(--accent);border:1px solid rgba(11,107,79,0.12)}
+    .halacha{padding:12px;border-radius:8px;background:#fafafa;margin-bottom:10px}
+    .meta{font-size:13px;color:var(--muted);margin-bottom:8px}
+
+    /* responsive */
+    @media (max-width:600px){.calendar{grid-template-columns:repeat(3,1fr)} }
+
+    /* small footer */
+    footer{margin-top:18px;color:var(--muted);font-size:13px}
+
+    /* simple animated highlight */
+    .highlight{border:1px solid rgba(11,107,79,0.12);
+      animation:pop .14s ease-out}
+    @keyframes pop{from{transform:scale(.995)}to{transform:scale(1)}}
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>הלכות - שולחן ערוך &amp; ילקוט יוסף</h1>
+      <p class="lead">בחרו יום בלוח (30 ימים). בכל יום תוצג הלכה מהשולחן ערוך והסבר ילקוט יוסף.</p>
+    </div>
+    <div>
+      <button class="btn" id="openIndex">חזרה ללוח</button>
+    </div>
+  </header>
+
+  <section id="index">
+    <div class="calendar" id="calendar"></div>
+  </section>
+
+  <section class="detail" id="detail">
+    <div class="toolbar">
+      <button class="ghost" id="prev">&larr; יום קודם</button>
+      <button class="ghost" id="next">יום הבא &rarr;</button>
+      <div style="flex:1"></div>
+      <div class="meta" id="dayLabel"></div>
+    </div>
+
+    <article>
+      <div class="halacha">
+        <div class="meta">שולחן ערוך - סימן</div>
+        <div id="halachaShulchan">(טקסט שולחן ערוך יופיע כאן)</div>
+      </div>
+
+      <div class="halacha">
+        <div class="meta">ילקוט יוסף - הסבר</div>
+        <div id="halachaYalkut">(טקסט ילקוט יוסף יופיע כאן)</div>
+      </div>
+    </article>
+
+  </section>
+
+  <footer>
+    ניתן לערוך את התכנים במערך הנתונים בראש הקוד. האתר עובד כקובץ סטטי (שמור כ- .html ופתח בדפדפן).
+  </footer>
+
+  <script>
+    // -----------------------------------------
+    // נתוני התכנים - החליפו כאן לכל יום את ההלכות הרצויות
+    // כל פריט מייצג יום: {label: 'א', shulchan: '...', yalkut: '...'}
+    // אתה יכול למלא כאן 30 פריטים (להלן דוגמאות קצרות). 
+    const data = [
+  {
+    label: 'א',
+    shulchan: 'שולחן ערוך אורח חיים סימן א סעיף א: יתגבר כארי לעמוד בבוקר לעבודת בוראו שיהא הוא מעורר השחר.',
+    yalkut: 'ילקוט יוסף: יש להשתדל לקום מוקדם לתפילה במניין, ובפרט לא לאחר זמן ק״ש. מי שקשה לו לקום, יכוון לפחות להתפלל בזמנה.'
+  },
+  {
+    label: 'ב',
+    shulchan: 'סעיף ב: יתבונן כי כשניעור משנתו, יש לו להודות לה׳ שהחזיר נשמתו.',
+    yalkut: 'ראוי לומר “מודה אני” תיכף בקומו. אין צריך נטילת ידים קודם, לפי שאין שם ה׳ בברכה.'
+  },
+  {
+    label: 'ג',
+    shulchan: 'סעיף ג: כשיקום ממיטתו, לא יעמוד פתאום, אלא ישב מעט.',
+    yalkut: 'יש לחשוש לסכנה ביציאה פתאומית מן השינה. המתנה קצרה מועילה לבריאות הגוף והנפש.'
+  },
+  {
+    label: 'ד',
+    shulchan: 'סעיף ד: לא ילבש אדם חלוקו מיושב אלא בעודו שוכב, כדי שלא יראה ערום.',
+    yalkut: 'מכאן לומדים על צניעות גם כשהאדם לבדו. אף יחיד בביתו נדרש לנהוג דרך כבוד לפני בוראו.'
+  },
+  {
+    label: 'ה',
+    shulchan: 'סימן ב: לא ילך אדם ד׳ אמות בגילוי ראש.',
+    yalkut: 'צריך לחבוש כיפה תמיד, משום יראת שמים. בשעת תפילה וברכה – חובה גמורה.'
+  },
+  {
+    label: 'ו',
+    shulchan: 'סימן ג: לא ילך אדם בקומה זקופה, שנאמר מלא כל הארץ כבודו.',
+    yalkut: 'המתהלך בגאווה – כאילו דוחק רגלי השכינה. ראוי ללכת בענווה ובמתינות.'
+  },
+  {
+    label: 'ז',
+    shulchan: 'סימן ד: אסור ליגע בבשרו קודם נטילת ידים שחרית.',
+    yalkut: 'יש רוח רעה השורה על הידיים בשינה, לכן יזהר ליטול ידיו קודם נגיעה בעיניים, באוזניים וכדומה.'
+  },
+  {
+    label: 'ח',
+    shulchan: 'סימן ה: צריך ליזהר לנקות פיו ולגרגר מים קודם תפילה.',
+    yalkut: 'ניקיון הפה הוא מכבוד התפילה, ומעיד על הכנה פנימית לקראת עמידה לפני ה׳.'
+  },
+  {
+    label: 'ט',
+    shulchan: 'סימן ו: יזהר אדם שלא להזכיר שם שמים לבטלה.',
+    yalkut: 'יש להקפיד לומר “ברוך ה׳”, “בעזרת ה׳” וכדומה רק מתוך יראה וכובד ראש, לא כדיבור סתמי.'
+  },
+  {
+    label: 'י',
+    shulchan: 'סימן ז: אין ראוי לירוק במקום קדוש.',
+    yalkut: 'בבתי כנסת ובמקומות של תפילה – איסור חמור. גם בשעת תפילה בבית – יכבד המקום ולא ינהג קלות ראש.'
+  },
+  {
+    label: 'י״א',
+    shulchan: 'סימן ח: צריך ליזהר במצוות ציצית.',
+    yalkut: 'הציצית מזכירה את כל המצוות. יבדוק את הציציות בכל בוקר שלא יהיו פסולות.'
+  },
+  {
+    label: 'י״ב',
+    shulchan: 'סימן ט: אסור לאדם להפסיק בין לבישת הטלית לברכתה.',
+    yalkut: 'יברך כשהוא מוכן ללבוש מיד, ולא ידבר בדברים אחרים בין הברכה ללבישה.'
+  },
+  {
+    label: 'י״ג',
+    shulchan: 'סימן י: צריך ליזהר בתפילין, שיהיו מונחות במקום הנכון.',
+    yalkut: 'תפילין של יד – כנגד הלב, ושל ראש – במקום שהמוח שולט. יבדוק שהרצועות שחורות כהלכה.'
+  },
+  {
+    label: 'י״ד',
+    shulchan: 'סימן י״א: אסור להסיח דעתו מתפילין בזמן שהן עליו.',
+    yalkut: 'הכוונה שלא ינהג קלות ראש או יישן בהם. צריך לזכור שהוא עומד לפני ה׳.'
+  },
+  {
+    label: 'ט״ו',
+    shulchan: 'סימן י״ב: תפילין צריכות גוף נקי שלא יפיח בהן.',
+    yalkut: 'אם קשה לו להחזיק עצמו, לא יניח תפילין עד שיוכל. על כן לא מניחים תפילין כל היום כמו פעם.'
+  },
+  {
+    label: 'ט״ז',
+    shulchan: 'סימן י״ג: אין לדבר בשעת התפילה.',
+    yalkut: 'דיבור באמצע תפילה או קריאת שמע נחשב הפסק, ואסור אף לדברים שבקדושה.'
+  },
+  {
+    label: 'י״ז',
+    shulchan: 'סימן י״ד: יש ליטול ידיים לפני תפילה.',
+    yalkut: 'נטילת ידיים היא הכנה רוחנית. אפילו אם נקיות, יטול משום כבוד התפילה.'
+  },
+  {
+    label: 'י״ח',
+    shulchan: 'סימן ט״ו: אין עומדים להתפלל אלא מתוך כובד ראש.',
+    yalkut: 'צריך הכנה ומחשבה לפני תפילה, לא מתוך שחוק ושיחה קלה.'
+  },
+  {
+    label: 'י״ט',
+    shulchan: 'סימן ט״ז: אין מתפללים במקום טינופת.',
+    yalkut: 'אסור להתפלל או לברך במקום שיש ריח רע או לכלוך. אם עבר – לא יצא ידי חובה.'
+  },
+  {
+    label: 'כ',
+    shulchan: 'סימן י״ז: לא יעמוד אדם להתפלל אלא במקום נקי וצנוע.',
+    yalkut: 'יש לבחור מקום קבוע לתפילה. זה מראה אהבה ויראה כלפי שמים.'
+  },
+  {
+    label: 'כ״א',
+    shulchan: 'סימן י״ח: אסור לאדם לעבור כנגד המתפלל.',
+    yalkut: 'העובר לפני המתפלל – כאילו חוצץ בינו לבין השכינה. ימתין עד שיסיים.'
+  },
+  {
+    label: 'כ״ב',
+    shulchan: 'סימן י״ט: אין להפסיק בתפילה באמצע שמונה עשרה.',
+    yalkut: 'אף אם נפל דבר או בא אדם, לא יפסיק. רק מפני סכנה מותר.'
+  },
+  {
+    label: 'כ״ג',
+    shulchan: 'סימן כ: אסור להגביה קולו בתפילה יותר מדי.',
+    yalkut: 'תפילה בלחש כראוי, לא בקול רם שיטריד אחרים. אך אם זה עוזר לכוונה – מותר במידה.'
+  },
+  {
+    label: 'כ״ד',
+    shulchan: 'סימן כ״א: אין אדם רשאי לעבור לפני ספר תורה בשעת קריאה.',
+    yalkut: 'יש להמתין ולא לעבור בין הבימה לבין הקורא. זהו זלזול בכבוד התורה.'
+  },
+  {
+    label: 'כ״ה',
+    shulchan: 'סימן כ״ב: יש לנהוג כבוד בבית הכנסת.',
+    yalkut: 'לא מדברים שיחת חולין ולא אוכלים שם. אם זה בית מדרש קבוע – מותר ללמוד בלבד.'
+  },
+  {
+    label: 'כ״ו',
+    shulchan: 'סימן כ״ג: יש להשתחוות במודים.',
+    yalkut: 'השתחווה קלה בראש ובגוף, ולא ירכין עצמו יותר מדי. יכוין להודות על חסדי ה׳.'
+  },
+  {
+    label: 'כ״ז',
+    shulchan: 'סימן כ״ד: אם טעה בתפילה – חוזר למקום שטעה.',
+    yalkut: 'אם דילג ברכה או התבלבל, יש לו סדרי תיקון שונים לפי מקום הטעות. תלוי באיזה שלב נזכר.'
+  },
+  {
+    label: 'כ״ח',
+    shulchan: 'סימן כ״ה: יש להניח תפילין של ראש לפני של יד בשעת לימוד בלבד.',
+    yalkut: 'בעת הלימוד, אפשר להראות לאחרים את מצוות התפילין, אך בתפילה הסדר קבוע – יד לפני ראש.'
+  },
+  {
+    label: 'כ״ט',
+    shulchan: 'סימן כ״ו: צריך לברך על מצוותיו בכוונה.',
+    yalkut: 'כל ברכה צריכה כוונה אמיתית – “וציוונו” פירושו שמקבל על עצמו עול מצוות.'
+  },
+  {
+    label: 'ל',
+    shulchan: 'סימן כ״ז: אין מברכים ברכה לבטלה.',
+    yalkut: 'אסור להוציא שם שמים לבטלה. אם הסתפק אם בירך – לא יחזור ויברך, ספק ברכות להקל.'
+  }
+];
+    // -----------------------------------------
+
+    const calendarEl = document.getElementById('calendar');
+    const detailEl = document.getElementById('detail');
+    const indexEl = document.getElementById('index');
+    const halachaShul = document.getElementById('halachaShulchan');
+    const halachaYalk = document.getElementById('halachaYalkut');
+    const dayLabel = document.getElementById('dayLabel');
+
+    // build calendar
+    data.forEach((d, i)=>{
+      const div = document.createElement('button');
+      div.className = 'day';
+      div.innerHTML = `<span class="num">${i+1}</span><span class="label">${d.label}</span>`;
+      div.addEventListener('click', ()=> openDay(i));
+      calendarEl.appendChild(div);
+    });
+
+    let current = null;
+    function openDay(idx){
+      current = idx;
+      const day = data[idx];
+      dayLabel.textContent = `יום ${idx+1} — ${day.label}`;
+      halachaShul.textContent = day.shulchan;
+      halachaYalk.textContent = day.yalkut;
+      detailEl.classList.add('active');
+      indexEl.style.display = 'none';
+      window.scrollTo({top:0,behavior:'smooth'});
+    }
+
+    document.getElementById('openIndex').addEventListener('click', ()=>{
+      detailEl.classList.remove('active');
+      indexEl.style.display = '';
+      current = null;
+    });
+
+    document.getElementById('prev').addEventListener('click', ()=>{
+      if(current===null) return; const nextIdx = (current-1+data.length)%data.length; openDay(nextIdx);
+    });
+    document.getElementById('next').addEventListener('click', ()=>{
+      if(current===null) return; const nextIdx = (current+1)%data.length; openDay(nextIdx);
+    });
+
+    // keyboard navigation (א/ב keys aren't straightforward) - use arrows
+    document.addEventListener('keydown', (e)=>{
+      if(current===null) return;
+      if(e.key === 'ArrowLeft') document.getElementById('prev').click();
+      if(e.key === 'ArrowRight') document.getElementById('next').click();
+      if(e.key === 'Escape') document.getElementById('openIndex').click();
+    });
+
+  </script>
+</body>
+</html>
