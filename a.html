@@ -1,144 +1,154 @@
 <!doctype html>
 <html lang="he" dir="rtl">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>הלכות - שולחן ערוך וילקוט יוסף (30 ימים)</title>
-  <style>
-    :root{
-      --bg:#fbfbfb; --card:#fff; --accent:#0b6b4f; --muted:#666;
-      --grid-gap:12px; --pad:16px;
-    }
-    *{box-sizing:border-box}
-    body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial; background:var(--bg); color:#111; margin:0; padding:20px}
-    header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
-    h1{font-size:20px;margin:0;color:var(--accent)}
-    p.lead{margin:0;color:var(--muted)}
-
-    /* calendar */
-    .calendar{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:var(--grid-gap);margin-top:16px}
-    .day{background:var(--card);border-radius:10px;padding:12px;box-shadow:0 2px 6px rgba(10,10,10,0.06);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px}
-    .day span.num{font-weight:700;font-size:18px;color:var(--accent)}
-    .day span.label{font-size:14px;color:var(--muted)}
-
-    /* detail view */
-    .detail{display:none;background:var(--card);padding:18px;border-radius:12px;box-shadow:0 6px 18px rgba(10,10,10,0.06);margin-top:20px}
-    .detail.active{display:block}
-    .detail .toolbar{display:flex;gap:8px;align-items:center;margin-bottom:12px}
-    button.btn{background:var(--accent);color:white;border:none;padding:8px 12px;border-radius:8px;cursor:pointer}
-    button.ghost{background:transparent;color:var(--accent);border:1px solid rgba(11,107,79,0.12)}
-    .halacha{padding:12px;border-radius:8px;background:#fafafa;margin-bottom:10px}
-    .meta{font-size:13px;color:var(--muted);margin-bottom:8px}
-
-    /* responsive */
-    @media (max-width:600px){.calendar{grid-template-columns:repeat(3,1fr)} }
-
-    /* small footer */
-    footer{margin-top:18px;color:var(--muted);font-size:13px}
-
-    /* simple animated highlight */
-    .highlight{border:1px solid rgba(11,107,79,0.12);
-      animation:pop .14s ease-out}
-    @keyframes pop{from{transform:scale(.995)}to{transform:scale(1)}}
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>לימוד הלכות – שולחן ערוך וילקוט יוסף</title>
+<style>
+  :root{
+    --bg:#f3f6f9;
+    --card:#fff;
+    --accent:#0b6b4f;
+    --muted:#666;
+    --today:#fef3c7;
+    --grid-gap:14px;
+    --pad:16px;
+    --font:"Segoe UI", Roboto, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; padding:20px; font-family:var(--font); background:var(--bg); color:#111;}
+  header{display:flex; flex-direction:column; gap:10px; text-align:right;}
+  h1{margin:0; font-size:26px; color:var(--accent);}
+  p.lead{margin:0; color:var(--muted); font-size:16px;}
+  
+  /* Calendar */
+  .calendar{display:grid; grid-template-columns:repeat(auto-fill,minmax(90px,1fr)); gap:var(--grid-gap); margin-top:20px;}
+  .day{background:var(--card); border-radius:12px; padding:12px; cursor:pointer; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; transition:transform .15s, box-shadow .15s;}
+  .day:hover{transform:translateY(-3px); box-shadow:0 6px 12px rgba(0,0,0,.1);}
+  .day span.num{font-weight:700; font-size:18px; color:var(--accent);}
+  .day span.label{font-size:13px; color:var(--muted);}
+  .day.today{background:var(--today); border:2px solid var(--accent);}
+  
+  /* Detail View */
+  .detail{display:none; background:var(--card); padding:20px; border-radius:14px; box-shadow:0 8px 20px rgba(0,0,0,.08); margin-top:25px;}
+  .detail.active{display:block;}
+  .toolbar{display:flex; gap:10px; align-items:center; margin-bottom:15px;}
+  button.btn, button.ghost{border:none; padding:8px 14px; border-radius:8px; cursor:pointer; font-size:14px; transition:.2s;}
+  button.btn{background:var(--accent); color:white;}
+  button.ghost{background:transparent; color:var(--accent); border:1px solid rgba(11,107,79,.2);}
+  .halacha{padding:14px; border-radius:10px; background:#fafafa; margin-bottom:12px; line-height:1.5;}
+  .meta{font-size:13px; color:var(--muted); margin-bottom:6px;}
+  
+  /* Highlight Today Study */
+  .study-today{background:#e0f2f1; padding:12px; border-left:4px solid var(--accent); margin-bottom:20px; border-radius:10px; font-weight:600;}
+  
+  /* Responsive */
+  @media(max-width:600px){.calendar{grid-template-columns:repeat(3,1fr);}}
+  
+</style>
 </head>
 <body>
-  <header>
-    <div>
-      <h1>הלכות - שולחן ערוך &amp; ילקוט יוסף</h1>
-      <p class="lead">בחרו יום בלוח (30 ימים). בכל יום תוצג הלכה מהשולחן ערוך והסבר ילקוט יוסף.</p>
+
+<header>
+  <h1>לימוד הלכות – שולחן ערוך וילקוט יוסף</h1>
+  <p class="lead">בחרו יום בלוח (30 ימים). כאן תוכלו לראות מה צריך ללמוד בכל יום, והלכות מהשולחן ערוך עם הסבר ילקוט יוסף.</p>
+</header>
+
+<section class="study-today" id="todayStudy">
+  לימוד היום: <span id="todayLabel">טקסט לימוד היום</span>
+</section>
+
+<section id="index">
+  <div class="calendar" id="calendar"></div>
+</section>
+
+<section class="detail" id="detail">
+  <div class="toolbar">
+    <button class="ghost" id="prev">&larr; יום קודם</button>
+    <button class="ghost" id="next">יום הבא &rarr;</button>
+    <div style="flex:1"></div>
+    <div class="meta" id="dayLabel"></div>
+  </div>
+
+  <article>
+    <div class="halacha">
+      <div class="meta">שולחן ערוך - סימן</div>
+      <div id="halachaShulchan">(טקסט שולחן ערוך)</div>
     </div>
-    <div>
-      <button class="btn" id="openIndex">חזרה ללוח</button>
+
+    <div class="halacha">
+      <div class="meta">ילקוט יוסף - הסבר</div>
+      <div id="halachaYalkut">(טקסט ילקוט יוסף)</div>
     </div>
-  </header>
+  </article>
 
-  <section id="index">
-    <div class="calendar" id="calendar"></div>
-  </section>
+  <button class="btn" id="openIndex">חזרה ללוח</button>
+</section>
 
-  <section class="detail" id="detail">
-    <div class="toolbar">
-      <button class="ghost" id="prev">&larr; יום קודם</button>
-      <button class="ghost" id="next">יום הבא &rarr;</button>
-      <div style="flex:1"></div>
-      <div class="meta" id="dayLabel"></div>
-    </div>
+<footer style="text-align:center; margin-top:30px; color:var(--muted); font-size:13px;">
+  &copy; 2025 - אתר לימוד אישי
+</footer>
 
-    <article>
-      <div class="halacha">
-        <div class="meta">שולחן ערוך - סימן</div>
-        <div id="halachaShulchan">(טקסט שולחן ערוך יופיע כאן)</div>
-      </div>
+<script src="data.js"></script>
+<script>
+const calendarEl = document.getElementById('calendar');
+const detailEl = document.getElementById('detail');
+const indexEl = document.getElementById('index');
+const halachaShul = document.getElementById('halachaShulchan');
+const halachaYalk = document.getElementById('halachaYalkut');
+const dayLabel = document.getElementById('dayLabel');
+const todayLabelEl = document.getElementById('todayLabel');
 
-      <div class="halacha">
-        <div class="meta">ילקוט יוסף - הסבר</div>
-        <div id="halachaYalkut">(טקסט ילקוט יוסף יופיע כאן)</div>
-      </div>
-    </article>
+const todayIdx = new Date().getDate()-1; // ניתן לשנות ללוח לימוד מותאם
 
-  </section>
+data.forEach((d,i)=>{
+  const div = document.createElement('button');
+  div.className='day';
+  if(i===todayIdx) div.classList.add('today');
+  div.innerHTML=`<span class="num">${i+1}</span><span class="label">${d.label}</span>`;
+  div.addEventListener('click', ()=>openDay(i));
+  calendarEl.appendChild(div);
+});
 
-  <footer>
-    ניתן לערוך את התכנים במערך הנתונים בראש הקוד. האתר עובד כקובץ סטטי (שמור כ- .html ופתח בדפדפן).
-  </footer>
+// הצגת לימוד היום
+todayLabelEl.textContent = `${data[todayIdx].label} - ${data[todayIdx].shulchan}`;
 
-  <script>
-    // -----------------------------------------
-    // נתוני התכנים - החליפו כאן לכל יום את ההלכות הרצויות
-    // כל פריט מייצג יום: {label: 'א', shulchan: '...', yalkut: '...'}
-    // אתה יכול למלא כאן 30 פריטים (להלן דוגמאות קצרות). 
+let current = null;
+function openDay(idx){
+  current=idx;
+  const day=data[idx];
+  dayLabel.textContent=`יום ${idx+1} — ${day.label}`;
+  halachaShul.textContent=day.shulchan;
+  halachaYalk.textContent=day.yalkut;
+  detailEl.classList.add('active');
+  indexEl.style.display='none';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
 
+document.getElementById('openIndex').addEventListener('click', ()=>{
+  detailEl.classList.remove('active');
+  indexEl.style.display='';
+  current=null;
+});
 
-    const calendarEl = document.getElementById('calendar');
-    const detailEl = document.getElementById('detail');
-    const indexEl = document.getElementById('index');
-    const halachaShul = document.getElementById('halachaShulchan');
-    const halachaYalk = document.getElementById('halachaYalkut');
-    const dayLabel = document.getElementById('dayLabel');
+document.getElementById('prev').addEventListener('click', ()=>{
+  if(current===null) return;
+  const nextIdx = (current-1+data.length)%data.length;
+  openDay(nextIdx);
+});
+document.getElementById('next').addEventListener('click', ()=>{
+  if(current===null) return;
+  const nextIdx = (current+1)%data.length;
+  openDay(nextIdx);
+});
 
-    // build calendar
-    data.forEach((d, i)=>{
-      const div = document.createElement('button');
-      div.className = 'day';
-      div.innerHTML = `<span class="num">${i+1}</span><span class="label">${d.label}</span>`;
-      div.addEventListener('click', ()=> openDay(i));
-      calendarEl.appendChild(div);
-    });
+document.addEventListener('keydown',(e)=>{
+  if(current===null) return;
+  if(e.key==='ArrowLeft') document.getElementById('prev').click();
+  if(e.key==='ArrowRight') document.getElementById('next').click();
+  if(e.key==='Escape') document.getElementById('openIndex').click();
+});
+</script>
 
-    let current = null;
-    function openDay(idx){
-      current = idx;
-      const day = data[idx];
-      dayLabel.textContent = `יום ${idx+1} — ${day.label}`;
-      halachaShul.textContent = day.shulchan;
-      halachaYalk.textContent = day.yalkut;
-      detailEl.classList.add('active');
-      indexEl.style.display = 'none';
-      window.scrollTo({top:0,behavior:'smooth'});
-    }
-
-    document.getElementById('openIndex').addEventListener('click', ()=>{
-      detailEl.classList.remove('active');
-      indexEl.style.display = '';
-      current = null;
-    });
-
-    document.getElementById('prev').addEventListener('click', ()=>{
-      if(current===null) return; const nextIdx = (current-1+data.length)%data.length; openDay(nextIdx);
-    });
-    document.getElementById('next').addEventListener('click', ()=>{
-      if(current===null) return; const nextIdx = (current+1)%data.length; openDay(nextIdx);
-    });
-
-    // keyboard navigation (א/ב keys aren't straightforward) - use arrows
-    document.addEventListener('keydown', (e)=>{
-      if(current===null) return;
-      if(e.key === 'ArrowLeft') document.getElementById('prev').click();
-      if(e.key === 'ArrowRight') document.getElementById('next').click();
-      if(e.key === 'Escape') document.getElementById('openIndex').click();
-    });
-
-  </script>
 </body>
 </html>
